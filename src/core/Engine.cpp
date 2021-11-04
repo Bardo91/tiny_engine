@@ -66,7 +66,6 @@ namespace te {
 		}
 
 		void Engine::draw(uint8_t* _buffer) {
-
 			memset(_buffer, 0, width_ * height_ * 4);
 
 			float rotZ[4][4];
@@ -86,8 +85,6 @@ namespace te {
 			rotX[2][1] = -sinf(timeCounter * 0.5f);
 			rotX[2][2] = cosf(timeCounter * 0.5f);
 			rotX[3][3] = 1.0f;
-
-
 
 			for (const auto &tri : cube_.tris) {
 				timeCounter += 0.00001;
@@ -142,39 +139,49 @@ namespace te {
 		void Engine::drawLine(uint8_t* _buffer, Vec3 _p1, Vec3 _p2, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a){
 			float dx = _p2.x - _p1.x;
 			float dy = _p2.y - _p1.y;
-			float mod = sqrt(dx * dx + dy * dy);
-			dx /= mod;
-			dy /= mod;
 
 			if (dx > dy) { // Line is "more" horizontal
+				float m = dy / dx;
+				float sign = dx > 0 ? 1 : -1;
 				if (dx > 0) {
-					for (unsigned x = _p1.x; x < _p2.x; x++) {
-						unsigned y = _p1.y + dy * (x - _p1.x);
+					for (unsigned i = 0; i < fabs(dx); i++) {
+						unsigned x = _p1.x + sign*i;
+						unsigned y = _p1.y + m*sign*i;
 						drawPixel(_buffer, y, x, _r, _g, _b, _a);
 					}
-				} else {
-					for (unsigned x = _p1.x; x > _p2.x; x--) {
-						unsigned y = _p1.y + dy * (x - _p1.x);
-						drawPixel(_buffer, y, x, _r, _g, _b, _a);
-					}
-				}
+				} 
 			} else { // "Line is "more" vertical
-				if (dy > 0) {
-					for (unsigned y = _p1.y; y < _p2.y; y++) {
-						unsigned x = _p1.x + dx * (y - _p1.y);
-						drawPixel(_buffer, y, x, _r, _g, _b, _a);
-					}
-				}
-				else {
-					for (unsigned y = _p1.y; y > _p2.y; y--) {
-						unsigned x = _p1.x + dx * (y - _p1.y);
+				float m = dx / dy;
+				float sign = dy > 0 ? 1 : -1;
+				if (dx > 0) {
+					for (unsigned i = 0; i < fabs(dy); i++) {
+						unsigned y = _p1.y + sign * i;
+						unsigned x = _p1.x + m * sign * i;
 						drawPixel(_buffer, y, x, _r, _g, _b, _a);
 					}
 				}
 			}
+
+			/*float dx = _p2.x - _p1.x;
+			float dy = _p2.y - _p1.y;
+
+			float m = dy / dx;
+			float b = _p1.y - (m * _p1.x);
+
+			int j = 0;
+			for (size_t i = 0; i < dx; i++) {
+				drawPixel(_buffer, _p1.x + i, round(m * (_p1.x + i) + b), _r, _g, _b, _a);
+			}*/
+
 		}
 
 		void Engine::drawTriangle(uint8_t* _buffer, Triangle _t, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a) {
+			drawLine(_buffer, _t.p[0], _t.p[1], _r, _g, _b, _a);
+			drawLine(_buffer, _t.p[1], _t.p[2], _r, _g, _b, _a);
+			drawLine(_buffer, _t.p[2], _t.p[0], _r, _g, _b, _a);
+		}
+
+		void Engine::drawTriangleFilled(uint8_t* _buffer, Triangle _t, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a) {
 			drawLine(_buffer, _t.p[0], _t.p[1], _r, _g, _b, _a);
 			drawLine(_buffer, _t.p[1], _t.p[2], _r, _g, _b, _a);
 			drawLine(_buffer, _t.p[2], _t.p[0], _r, _g, _b, _a);
