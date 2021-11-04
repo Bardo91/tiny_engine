@@ -27,6 +27,10 @@ target_include_directories(te_os
     $<INSTALL_INTERFACE:include>
 )
 
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(te_os PUBLIC OpenMP::OpenMP_CXX)
+endif()
 
 file(GLOB_RECURSE TE_TEST_SOURCE ${PROJECT_SOURCE_DIR}/src/test/*.cpp)
 add_executable(te_test_win ${TE_TEST_SOURCE})

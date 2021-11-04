@@ -44,8 +44,12 @@ namespace te {
             }
         }
 
-        HRESULT WindowWindows::Initialize()
+        HRESULT WindowWindows::Initialize(int _bufferWidth, int _bufferHeight)
         {
+            bufferWidth_ = _bufferWidth;
+            bufferHeight_ = _bufferHeight;
+            unsigned sizeArray = bufferWidth_ * bufferHeight_ * 4;
+            buffer_ = new uint8_t[sizeArray];
             t0 = std::chrono::high_resolution_clock::now();
             HRESULT hr;
 
@@ -298,49 +302,34 @@ namespace te {
 
                 m_pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 
-                m_pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+                m_pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Black));
                 D2D1_SIZE_F rtSize = m_pRenderTarget->GetSize();
                 // Draw a grid background.
-                int width = static_cast<int>(rtSize.width);
-                int height = static_cast<int>(rtSize.height);
+                unsigned width = static_cast<unsigned>(rtSize.width);
+                unsigned height = static_cast<unsigned>(rtSize.height);
 
-                for (int x = 0; x < width; x += 10)
-                {
-                    m_pRenderTarget->DrawLine(
-                        D2D1::Point2F(static_cast<FLOAT>(x), 0.0f),
-                        D2D1::Point2F(static_cast<FLOAT>(x), rtSize.height),
-                        m_pLightSlateGrayBrush,
-                        0.5f
-                    );
+                D2D1_BITMAP_PROPERTIES bmpProps = {
+                    {DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE},
+                    96,
+                    96,
+                };
+
+                ID2D1Bitmap* bmp;
+                hr = m_pRenderTarget->CreateBitmap(
+                    D2D1::SizeU(bufferWidth_, bufferHeight_),
+                    buffer_, // <<--- Wrong, see (a) below
+                    bufferWidth_ * 4, // <<--- Close but wrong, see (b) below
+                    bmpProps, // <<--- Wrong, see (c) below
+                    &bmp);
+
+                if (SUCCEEDED(hr)) {
+                    m_pRenderTarget->DrawBitmap(  bmp,
+                        D2D1::RectF(0, 0, width, height), 
+                        1.0f,
+                        D2D1_BITMAP_INTERPOLATION_MODE::D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
+                        D2D1::RectF(0, 0, bufferWidth_, bufferHeight_));
                 }
-
-                for (int y = 0; y < height; y += 10)
-                {
-                    m_pRenderTarget->DrawLine(
-                        D2D1::Point2F(0.0f, static_cast<FLOAT>(y)),
-                        D2D1::Point2F(rtSize.width, static_cast<FLOAT>(y)),
-                        m_pLightSlateGrayBrush,
-                        0.5f
-                    );
-                }
-                // Draw two rectangles.
-                D2D1_RECT_F rectangle1 = D2D1::RectF(
-                    rtSize.width / 2 - 50.0f,
-                    rtSize.height / 2 - 50.0f,
-                    rtSize.width / 2 + 50.0f,
-                    rtSize.height / 2 + 50.0f
-                );
-
-                D2D1_RECT_F rectangle2 = D2D1::RectF(
-                    rtSize.width / 2 - 100.0f,
-                    rtSize.height / 2 - 100.0f,
-                    rtSize.width / 2 + 100.0f,
-                    rtSize.height / 2 + 100.0f
-                );
-                // Draw a filled rectangle.
-                m_pRenderTarget->FillRectangle(&rectangle1, m_pLightSlateGrayBrush);
-                // Draw the outline of a rectangle.
-                m_pRenderTarget->DrawRectangle(&rectangle2, m_pCornflowerBlueBrush);
+                bmp->Release();
 
                 auto t1 = std::chrono::high_resolution_clock::now();
                 float fps = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count();
@@ -354,7 +343,7 @@ namespace te {
                     cpFps,
                     sFps.size(),
                     m_pTextFormat,
-                    D2D1::RectF(0, 0, 100, 200),
+                    D2D1::RectF(0, 0, 100, 100),
                     m_pBlackBrush
                 );
 

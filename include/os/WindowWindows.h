@@ -39,7 +39,9 @@ namespace te {
             ~WindowWindows();
 
             // Register the window class and call methods for instantiating drawing resources
-            HRESULT Initialize();
+            HRESULT Initialize(int _bufferWidth, int _bufferHeigh);
+
+            uint8_t * getBuffer() const { return buffer_; };
 
             // Process and dispatch messages
             void RunMessageLoop();
@@ -81,6 +83,9 @@ namespace te {
             IDWriteFactory* m_pDWriteFactory;
             IDWriteTextFormat* m_pTextFormat;
             ID2D1SolidColorBrush* m_pBlackBrush;
+
+            int bufferWidth_, bufferHeight_;
+            uint8_t *buffer_;
         };
     }
 }
