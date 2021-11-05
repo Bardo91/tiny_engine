@@ -14,23 +14,23 @@ namespace te {
 			height_ = _height;
 
 			cube_.tris = {
-				{0.0f, 0.0f, 0.0f,		0.0f, 1.0f, 0.0f,		1.0f, 1.0f, 0.0f, },
-				{0.0f, 0.0f, 0.0f,		1.0f, 1.0f, 0.0f,		1.0f, 0.0f, 0.0f, },
+				{{0.0f, 0.0f, 0.0f},		{0.0f, 1.0f, 0.0f},		{1.0f, 1.0f, 0.0f} },
+				{{0.0f, 0.0f, 0.0f},		{1.0f, 1.0f, 0.0f},		{1.0f, 0.0f, 0.0f} },
 
-				{1.0f, 0.0f, 0.0f,		1.0f, 1.0f, 0.0f,		1.0f, 1.0f, 1.0f, },
-				{1.0f, 0.0f, 0.0f,		1.0f, 1.0f, 1.0f,		0.0f, 0.0f, 1.0f, },
+				{{1.0f, 0.0f, 0.0f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f, 1.0f} },
+				{{1.0f, 0.0f, 0.0f},		{1.0f, 1.0f, 1.0f},		{0.0f, 0.0f, 1.0f} },
 
-				{1.0f, 0.0f, 1.0f,		1.0f, 1.0f, 1.0f,		0.0f, 1.0f, 1.0f, },
-				{1.0f, 0.0f, 1.0f,		0.0f, 1.0f, 1.0f,		0.0f, 0.0f, 1.0f, },
+				{{1.0f, 0.0f, 1.0f},		{1.0f, 1.0f, 1.0f},		{0.0f, 1.0f, 1.0f} },
+				{{1.0f, 0.0f, 1.0f},		{0.0f, 1.0f, 1.0f},		{0.0f, 0.0f, 1.0f} },
 
-				{0.0f, 0.0f, 1.0f,		0.0f, 1.0f, 1.0f,		0.0f, 1.0f, 0.0f, },
-				{0.0f, 0.0f, 1.0f,		0.0f, 1.0f, 0.0f,		0.0f, 0.0f, 0.0f, },
+				{{0.0f, 0.0f, 1.0f},		{0.0f, 1.0f, 1.0f},		{0.0f, 1.0f, 0.0f} },
+				{{0.0f, 0.0f, 1.0f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f, 0.0f} },
 
-				{0.0f, 1.0f, 0.0f,		0.0f, 1.0f, 1.0f,		1.0f, 1.0f, 1.0f, },
-				{0.0f, 1.0f, 0.0f,		1.0f, 1.0f, 1.0f,		1.0f, 1.0f, 0.0f, },
+				{{0.0f, 1.0f, 0.0f},		{0.0f, 1.0f, 1.0f},		{1.0f, 1.0f, 1.0f} },
+				{{0.0f, 1.0f, 0.0f},		{1.0f, 1.0f, 1.0f},		{1.0f, 1.0f, 0.0f} },
 
-				{1.0f, 0.0f, 1.0f,		0.0f, 0.0f, 1.0f,		0.0f, 0.0f, 0.0f, },
-				{1.0f, 0.0f, 1.0f,		0.0f, 0.0f, 0.0f,		1.0f, 0.0f, 0.0f, },
+				{{1.0f, 0.0f, 1.0f},		{0.0f, 0.0f, 1.0f},		{0.0f, 0.0f, 0.0f} },
+				{{1.0f, 0.0f, 1.0f},		{0.0f, 0.0f, 0.0f},		{1.0f, 0.0f, 0.0f} }
 			};
 		}
 
@@ -58,39 +58,61 @@ namespace te {
 			Mat44 rotX = Mat44::rotX(timeCounter*0.5f);;
 			
 			for (auto tri : cube_.tris) {
-				timeCounter += 0.00001;
+				timeCounter += 0.000001;
 
-				tri.p[0] = tri.p[0] * rotZ * rotX;
-				tri.p[1] = tri.p[1] * rotZ * rotX;
-				tri.p[2] = tri.p[2] * rotZ * rotX;
+				tri.transform(rotZ).transform(rotX);
+				tri.p_[0].z += 3.0f;
+				tri.p_[1].z += 3.0f;
+				tri.p_[2].z += 3.0f;
+
+				// Check if triangle should be drawn
+				Vec3 camera = { 0.0f, 0.0f, 0.0f };
 				
-				tri.p[0].z += 3.0f;
-				tri.p[1].z += 3.0f;
-				tri.p[2].z += 3.0f;
+				Vec3 l1 = tri.p_[1] - tri.p_[0];
+				Vec3 l2 = tri.p_[2] - tri.p_[0];
+				Vec3 n = {
+					l1.y * l2.z - l1.z * l2.y,
+					l1.z * l2.x - l1.x * l2.z,
+					l1.x * l2.y - l1.y * l2.x
+				};
 
-				Triangle triProj = projectTriangle(tri);
+				//if (n.dot(tri.p_[0] - camera) < 0) {
+					Triangle triProj = projectTriangle(tri);
+					drawTriangle(_buffer, triProj, 255, 255, 255);
+				//}
 
-				drawTriangle(_buffer, triProj, 255, 0, 0);
+				/*if (camera.dot(tri.n_) < 0) {
+				} else {
+					Triangle triProj = projectTriangle(tri);
+					drawTriangle(_buffer, triProj, 0, 0, 255);
+				}*/
 			}
 		}
 
-		Triangle Engine::projectTriangle(Triangle _t) const {
-			Triangle triProj;
-			triProj.p[0] = _t.p[0] * projMat_;
-			triProj.p[1] = _t.p[1] * projMat_;
-			triProj.p[2] = _t.p[2] * projMat_;
+		Vec3 Engine::projectPoint(const Vec3& _t) const {
+			Vec3 point = _t * projMat_;
+			point.x += 1.0f; 
+			point.y += 1.0f;
+			point.x *= 0.5f * width_;
+			point.y *= 0.5f * height_;
+			return point;
+		}
 
+		Triangle Engine::projectTriangle(const Triangle& _t) const {
+			Triangle triProj = _t;
 
-			triProj.p[0].x += 1.0f; triProj.p[0].y += 1.0f;
-			triProj.p[1].x += 1.0f; triProj.p[1].y += 1.0f;
-			triProj.p[2].x += 1.0f; triProj.p[2].y += 1.0f;
+			triProj.transform(projMat_);
 
-			triProj.p[0].x *= 0.5f * width_;
-			triProj.p[0].y *= 0.5f * height_;
-			triProj.p[1].x *= 0.5f * width_;
-			triProj.p[1].y *= 0.5f * height_;
-			triProj.p[2].x *= 0.5f * width_;
-			triProj.p[2].y *= 0.5f * height_;
+			triProj.p_[0].x += 1.0f; triProj.p_[0].y += 1.0f;
+			triProj.p_[1].x += 1.0f; triProj.p_[1].y += 1.0f;
+			triProj.p_[2].x += 1.0f; triProj.p_[2].y += 1.0f;
+
+			triProj.p_[0].x *= 0.5f * width_;
+			triProj.p_[0].y *= 0.5f * height_;
+			triProj.p_[1].x *= 0.5f * width_;
+			triProj.p_[1].y *= 0.5f * height_;
+			triProj.p_[2].x *= 0.5f * width_;
+			triProj.p_[2].y *= 0.5f * height_;
 
 			return triProj;
 		}
@@ -105,30 +127,26 @@ namespace te {
 		}
 
 		void Engine::drawLine(uint8_t* _buffer, Vec3 _p1, Vec3 _p2, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a){
-			float dx = _p2.x - _p1.x;
-			float dy = _p2.y - _p1.y;
+			//float dx = _p2.x - _p1.x;
+			//float dy = _p2.y - _p1.y;
 
-			if (dx > dy) { // Line is "more" horizontal
-				float m = dy / dx;
-				float sign = dx > 0 ? 1 : -1;
-				if (dx > 0) {
-					for (unsigned i = 0; i < fabs(dx); i++) {
-						unsigned x = _p1.x + sign*i;
-						unsigned y = _p1.y + m*sign*i;
-						drawPixel(_buffer, y, x, _r, _g, _b, _a);
-					}
-				} 
-			} else { // "Line is "more" vertical
-				float m = dx / dy;
-				float sign = dy > 0 ? 1 : -1;
-				if (dx > 0) {
-					for (unsigned i = 0; i < fabs(dy); i++) {
-						unsigned y = _p1.y + sign * i;
-						unsigned x = _p1.x + m * sign * i;
-						drawPixel(_buffer, y, x, _r, _g, _b, _a);
-					}
-				}
-			}
+			//if (dx > dy) { // Line is "more" horizontal
+			//	float m = dy / dx;
+			//	float sign = dx > 0 ? 1 : -1;
+			//	for (unsigned i = 0; i < fabs(dx); i++) {
+			//		unsigned x = _p1.x + sign * i;
+			//		unsigned y = _p1.y + m * sign * i;
+			//		drawPixel(_buffer, y, x, _r, _g, _b, _a);
+			//	}
+			//} else { // "Line is "more" vertical
+			//	float m = dx / dy;
+			//	float sign = dy > 0 ? 1 : -1;
+			//	for (unsigned i = 0; i < fabs(dy); i++) {
+			//		unsigned y = _p1.y + sign * i;
+			//		unsigned x = _p1.x + m * sign * i;
+			//		drawPixel(_buffer, y, x, _r, _g, _b, _a);
+			//	}
+			//}
 
 			/*float dx = _p2.x - _p1.x;
 			float dy = _p2.y - _p1.y;
@@ -141,18 +159,80 @@ namespace te {
 				drawPixel(_buffer, _p1.x + i, round(m * (_p1.x + i) + b), _r, _g, _b, _a);
 			}*/
 
+			int x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
+			dx = _p2.x - _p1.x;
+			dy = _p2.y - _p1.y;
+			dx1 = fabs(dx);
+			dy1 = fabs(dy);
+			px = 2 * dy1 - dx1;
+			py = 2 * dx1 - dy1;
+			if (dy1 <= dx1){
+				if (dx >= 0) {
+					x = _p1.x;
+					y = _p1.y;
+					xe = _p2.x;
+				}
+				else {
+					x = _p2.x;
+					y = _p2.y;
+					xe = _p1.x;
+				}
+				drawPixel(_buffer, x, y, _r, _g, _b, _a);
+				for (i = 0; x < xe; i++) {
+					x = x + 1;
+					if (px < 0) {
+						px = px + 2 * dy1;
+					}
+					else {
+						if ((dx < 0 && dy < 0) || (dx > 0 && dy > 0)) {
+							y = y + 1;
+						}else {
+							y = y - 1;
+						}
+						px = px + 2 * (dy1 - dx1);
+					}
+					drawPixel(_buffer, x, y, _r, _g, _b, _a);
+				}
+			}
+			else {
+				if (dy >= 0){
+					x = _p1.x;
+					y = _p1.y;
+					ye = _p2.y;
+				} else {
+					x = _p2.x;
+					y = _p2.y;
+					ye = _p1.y;
+
+					drawPixel(_buffer, x, y, _r, _g, _b, _a);
+					for (i = 0; y < ye; i++) {
+						y = y + 1;
+						if (py <= 0) {
+							py = py + 2 * dx1;
+						} else {
+							if ((dx < 0 && dy < 0) || (dx > 0 && dy > 0)) {
+								x = x + 1;
+							} else {
+								x = x - 1;
+							}
+							py = py + 2 * (dx1 - dy1);
+						}
+						drawPixel(_buffer, x, y, _r, _g, _b, _a);
+					}
+				}
+			}
 		}
 
 		void Engine::drawTriangle(uint8_t* _buffer, Triangle _t, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a) {
-			drawLine(_buffer, _t.p[0], _t.p[1], _r, _g, _b, _a);
-			drawLine(_buffer, _t.p[1], _t.p[2], _r, _g, _b, _a);
-			drawLine(_buffer, _t.p[2], _t.p[0], _r, _g, _b, _a);
+			drawLine(_buffer, _t.p_[0], _t.p_[1], _r, _g, _b, _a);
+			drawLine(_buffer, _t.p_[1], _t.p_[2], _r, _g, _b, _a);
+			drawLine(_buffer, _t.p_[2], _t.p_[0], _r, _g, _b, _a);
 		}
 
 		void Engine::drawTriangleFilled(uint8_t* _buffer, Triangle _t, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a) {
-			drawLine(_buffer, _t.p[0], _t.p[1], _r, _g, _b, _a);
-			drawLine(_buffer, _t.p[1], _t.p[2], _r, _g, _b, _a);
-			drawLine(_buffer, _t.p[2], _t.p[0], _r, _g, _b, _a);
+			drawLine(_buffer, _t.p_[0], _t.p_[1], _r, _g, _b, _a);
+			drawLine(_buffer, _t.p_[1], _t.p_[2], _r, _g, _b, _a);
+			drawLine(_buffer, _t.p_[2], _t.p_[0], _r, _g, _b, _a);
 		}
 	}
 }

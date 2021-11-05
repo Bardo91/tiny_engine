@@ -15,7 +15,7 @@ namespace te {
 		struct Vec3 {
 			float x, y, z;
 
-			Vec3 operator+(const Vec3& _other) {
+			Vec3 operator+(const Vec3& _other) const {
 				Vec3 res;
 				res.x = x + _other.x;
 				res.y = y + _other.y;
@@ -23,7 +23,7 @@ namespace te {
 				return res;
 			}
 
-			Vec3 operator-(const Vec3& _other) {
+			Vec3 operator-(const Vec3& _other) const {
 				Vec3 res;
 				res.x = x - _other.x;
 				res.y = y - _other.y;
@@ -31,15 +31,23 @@ namespace te {
 				return res;
 			}
 
-			float norm() {
+			Vec3 operator/(const float& _scalar) const {
+				Vec3 res;
+				res.x = x / _scalar;
+				res.y = y / _scalar;
+				res.z = z / _scalar;
+				return res;
+			}
+
+			float norm() const {
 				return sqrt(x * x + y * y + z * z);
 			}
 
-			float dot(const Vec3& _other) {
+			float dot(const Vec3& _other) const {
 				return x * _other.x + y * _other.y + z * _other.z;
 			}
 
-			Vec3 cross(const Vec3& _other) {
+			Vec3 cross(const Vec3& _other) const {
 				return{
 					y * _other.z - z * _other.y,
 					z* _other.x  - x* _other.z,

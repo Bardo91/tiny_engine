@@ -19,8 +19,9 @@ namespace te {
 			void draw(uint8_t *_buffer);
 
 		private:
-			Triangle projectTriangle(Triangle _t) const;
-
+			Triangle projectTriangle(const Triangle& _t) const;
+			Vec3 projectPoint(const Vec3& _t) const;
+			
 			void drawPixel(uint8_t* _buffer, unsigned _i, unsigned _j, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a = 255);
 			void drawLine(uint8_t* _buffer, Vec3 _p1, Vec3 _p2, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a = 255);
 			void drawTriangle(uint8_t* _buffer, Triangle _t, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a = 255);
