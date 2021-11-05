@@ -5,23 +5,11 @@
 //
 
 #include <cstdint>
-#include <vector>
+#include <core/mesh.h>
+#include <core/matrix.h>
 
 namespace te {
 	namespace core {
-
-		struct Vec3 {
-			float x, y, z;
-		};
-
-		struct Triangle {
-			Vec3 p[3];
-		};
-
-		struct Mesh {
-			std::vector<Triangle> tris;
-		};
-
 		class Engine {
 		public:
 			Engine(unsigned _width, unsigned _height);
@@ -31,6 +19,7 @@ namespace te {
 			void draw(uint8_t *_buffer);
 
 		private:
+			Triangle projectTriangle(Triangle _t) const;
 
 			void drawPixel(uint8_t* _buffer, unsigned _i, unsigned _j, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a = 255);
 			void drawLine(uint8_t* _buffer, Vec3 _p1, Vec3 _p2, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a = 255);
@@ -41,7 +30,7 @@ namespace te {
 
 			float near_, far_, fov_, aspectRatio_, fovRad_;
 
-			float projMat_[4][4];
+			Mat44 projMat_;
 
 			Mesh cube_;
 			float timeCounter = 0.0f;
