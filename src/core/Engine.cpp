@@ -39,12 +39,12 @@ namespace te {
 				{{ 1.0f, 0.0f, 1.0f},    {0.0f, 0.0f, 0.0f},    {1.0f, 0.0f, 0.0f} },
 			};
 
-		/*	cube_.tris = {
-				{{0,0,0},{0,1,0},{1,0,0}},
-				{{0,0,0},{0,1,0},{0,0,1}},
-				{{0,0,0},{0,0,1},{1,0,0}},
-				{{1,0,0},{0,0,1},{0,1,0}}
-			};*/
+			//cube_.tris = {
+			//	//{{0,0,0},{0,1,0},{1,0,0}},
+			//	//{{0,0,0},{0,1,0},{0,0,1}},
+			//	//{{0,0,0},{0,0,1},{1,0,0}},
+			//	{{1,0,0},{0,0,1},{0,1,0}}
+			//};
 		}
 
 		void Engine::setProjectionMatrixParameters(float _near, float _far, float _fov, float _aspectRatio) {
@@ -89,9 +89,9 @@ namespace te {
 					Triangle triProj = projectTriangle(tri);
 					drawTriangleFilled(buffer, triProj, 255, 255, 255);
 
-					Vec3 n1 = projectPoint(mid);
-					Vec3 n2 = projectPoint(mid +tri.n_);
-					drawLine(buffer, n1, n2, 0, 0, 255, 255);
+					//Vec3 n1 = projectPoint(mid);
+					//Vec3 n2 = projectPoint(mid +tri.n_);
+					//drawLine(buffer, n1, n2, 0, 0, 255, 255);
 				}
 
 				/*if (camera.dot(tri.n_) < 0) {
@@ -166,101 +166,78 @@ namespace te {
 			drawLine(_buffer, _t.p_[2], _t.p_[0], _r, _g, _b, _a);
 		}
 
+		void Engine::ScanLine(int* contour, long x1, long y1, long x2, long y2) {
+			long sx, sy, dx1, dy1, dx2, dy2, x, y, m, n, k, cnt;
+
+			sx = x2 - x1;
+			sy = y2 - y1;
+
+			if (sx > 0) dx1 = 1;
+			else if (sx < 0) dx1 = -1;
+			else dx1 = 0;
+
+			if (sy > 0) dy1 = 1;
+			else if (sy < 0) dy1 = -1;
+			else dy1 = 0;
+
+			m = fabs(sx);
+			n = fabs(sy);
+			dx2 = dx1;
+			dy2 = 0;
+
+			if (m < n)
+			{
+				m = fabs(sy);
+				n = fabs(sx);
+				dx2 = 0;
+				dy2 = dy1;
+			}
+
+			x = x1; y = y1;
+			cnt = m + 1;
+			k = n / 2;
+
+			while (cnt--)
+			{
+				if ((y >= 0) && (y < height_))
+				{
+					if (x < contour[y*2]) contour[y*2] = x;
+					if (x > contour[y*2+1]) contour[y*2+1] = x;
+				}
+
+				k += n;
+				if (k < m)
+				{
+					x += dx2;
+					y += dy2;
+				}
+				else
+				{
+					k -= m;
+					x += dx1;
+					y += dy1;
+				}
+			}
+		}
+
 		void Engine::drawTriangleFilled(uint8_t* _buffer, Triangle _t, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a) {
 
-			int minY = height_;
-			int maxY = 0;
-			for (unsigned i = 0; i < 3; i++) {
-				minY = minY < _t.p_[i].y? minY : _t.p_[i].y;
-				maxY = maxY > _t.p_[i].y? maxY : _t.p_[i].y;
-			}
-
-			int* contour = new int[2 * (maxY - minY)];
-			for (unsigned i = 0; i < maxY - minY; i++) {
-				contour[i * 2] = width_;
+			int* contour = new int[height_ * 2];
+			for (unsigned i = 0; i < height_; i++) {
+				contour[i * 2 + 0] = width_;
 				contour[i * 2 + 1] = 0;
 			}
-			
-			{
-				int x0 = _t.p_[0].x;
-				int y0 = _t.p_[0].y;
-				int x1 = _t.p_[1].x;
-				int y1 = _t.p_[1].y;
 
-				int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-				int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
-				int err = dx + dy, e2; /* error value e_xy */
+			ScanLine(contour, _t.p_[0].x, _t.p_[0].y, _t.p_[1].x, _t.p_[1].y);
+			ScanLine(contour, _t.p_[1].x, _t.p_[1].y, _t.p_[2].x, _t.p_[2].y);
+			ScanLine(contour, _t.p_[2].x, _t.p_[2].y, _t.p_[0].x, _t.p_[0].y);
 
-				for (;;) {  /* loop */
-					if (x0 < contour[(y0 - minY)*2 + 0]) {
-						contour[(y0 - minY)*2 + 0] = x0;
-					}
-					else if (x0 > contour[(y0 - minY)*2 + 1]) {
-						contour[(y0 - minY)*2 + 1] = x0;
-					}
-
-					if (x0 == x1 && y0 == y1) break;
-					e2 = 2 * err;
-					if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
-					if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
-				}
-			}
-
-			{
-				int x0 = _t.p_[1].x;
-				int y0 = _t.p_[1].y;
-				int x1 = _t.p_[2].x;
-				int y1 = _t.p_[2].y;
-
-				int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-				int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
-				int err = dx + dy, e2; /* error value e_xy */
-
-				for (;;) {  /* loop */
-					if (x0 < contour[(y0 - minY)*2 + 0]) {
-						contour[(y0 - minY)*2 + 0] = x0;
-					}
-					else if (x0 > contour[(y0 - minY)*2 + 1]) {
-						contour[(y0 - minY)*2 + 1] = x0;
-					}
-
-					if (x0 == x1 && y0 == y1) break;
-					e2 = 2 * err;
-					if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
-					if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
-				}
-			}
-
-			{
-				int x0 = _t.p_[2].x;
-				int y0 = _t.p_[2].y;
-				int x1 = _t.p_[0].x;
-				int y1 = _t.p_[0].y;
-
-				int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-				int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
-				int err = dx + dy, e2; /* error value e_xy */
-
-				for (;;) {  /* loop */
-					if (x0 < contour[(y0 - minY) + 0]) {
-						contour[(y0 - minY)*2 + 0] = x0;
-					}
-					else if (x0 > contour[(y0 - minY) + 1]) {
-						contour[(y0 - minY)*2 + 1] = x0;
-					}
-
-					if (x0 == x1 && y0 == y1) break;
-					e2 = 2 * err;
-					if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
-					if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
-				}
-			}
-
-			for (unsigned i = 0; i < maxY - minY; i++) {
+			for (unsigned i = 0; i < height_; i++) {
 				for (unsigned x = contour[i*2]; x < contour[i*2+1]; x++) {
-					drawPixel(_buffer, x, minY+i, _r, _g, _b, _a);
-				}
-				
+					if (contour[i*2+1] >= contour[i*2]) {
+						drawPixel(_buffer, x, i, _r, _g, _b, _a);
+					}
+				}	
 			}
 		}
 	}

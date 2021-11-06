@@ -314,12 +314,14 @@ namespace te {
                 };
 
                 ID2D1Bitmap* bmp;
+                buffer_.lock();
                 hr = m_pRenderTarget->CreateBitmap(
                     D2D1::SizeU(bufferWidth_, bufferHeight_),
                     buffer_.frontBuffer(), // <<--- Wrong, see (a) below
                     bufferWidth_ * 4, // <<--- Close but wrong, see (b) below
                     bmpProps, // <<--- Wrong, see (c) below
                     &bmp);
+                buffer_.unlock();
 
                 if (SUCCEEDED(hr)) {
                     m_pRenderTarget->DrawBitmap(  bmp,

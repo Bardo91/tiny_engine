@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <core/mesh.h>
 #include <core/matrix.h>
+#include <mutex>
 
 namespace te {
 	namespace core {
@@ -46,14 +47,27 @@ namespace te {
 				return back_;
 			}
 			void swap() {
+				guard_.lock();
 				uint8_t* tmp = front_;
 				front_ = back_;
 				back_ = tmp;
+				guard_.unlock();
 			}
+
+			void lock() { //  meh...
+				guard_.lock();
+			}
+
+			void unlock() {
+				guard_.unlock();
+			}
+
+
 		private:
 			uint8_t* currentBuffer_;
 			uint8_t* back_, *front_;
 			int width_, height_, channels_=4;
+			std::mutex guard_; 
 		};
 
 		class Engine {
@@ -72,6 +86,10 @@ namespace te {
 			void drawLine(uint8_t* _buffer, Vec3 _p1, Vec3 _p2, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a = 255);
 			void drawTriangle(uint8_t* _buffer, Triangle _t, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a = 255);
 			void drawTriangleFilled(uint8_t* _buffer, Triangle _t, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a=255);
+
+		private:	// Don't like it too much, but I don't want to design the algorithm
+			void ScanLine(int *contour, long x1, long y1, long x2, long y2);
+
 		private:
 			unsigned width_, height_;
 
