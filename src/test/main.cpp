@@ -18,7 +18,6 @@ int main(int _argc, char** _argv) {
         std::thread t([&] {
             Engine engine(width, height);
             engine.setProjectionMatrixParameters(0.1f, 1000.0f, 90.0f, float(height)/ width);
-            uint8_t* data = app.getBuffer();
             while (true) {
                     //#pragma omp parallel for collapse(2)
                     //for (int Y = 0; Y < height; Y++) {
@@ -43,7 +42,7 @@ int main(int _argc, char** _argv) {
                     //        data[idx + 3] = 255;*/
                     //    }
                     //}
-                    engine.draw(data);
+                    engine.draw(app.getBuffer());
                 }
             }
         );

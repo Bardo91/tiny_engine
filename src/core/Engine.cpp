@@ -14,24 +14,37 @@ namespace te {
 			height_ = _height;
 
 			cube_.tris = {
-				{{0.0f, 0.0f, 0.0f},		{0.0f, 1.0f, 0.0f},		{1.0f, 1.0f, 0.0f} },
-				{{0.0f, 0.0f, 0.0f},		{1.0f, 1.0f, 0.0f},		{1.0f, 0.0f, 0.0f} },
+				// SOUTH
+				{{ 0.0f, 0.0f, 0.0f},    {0.0f, 1.0f, 0.0f},    {1.0f, 1.0f, 0.0f} },
+				{{ 0.0f, 0.0f, 0.0f},    {1.0f, 1.0f, 0.0f},    {1.0f, 0.0f, 0.0f} },
 
-				{{1.0f, 0.0f, 0.0f},		{1.0f, 1.0f, 0.0f},		{1.0f, 1.0f, 1.0f} },
-				{{1.0f, 0.0f, 0.0f},		{1.0f, 1.0f, 1.0f},		{0.0f, 0.0f, 1.0f} },
+				// EAST                                                      
+				{{ 1.0f, 0.0f, 0.0f},    {1.0f, 1.0f, 0.0f},    {1.0f, 1.0f, 1.0f} },
+				{{ 1.0f, 0.0f, 0.0f},    {1.0f, 1.0f, 1.0f},    {1.0f, 0.0f, 1.0f} },
 
-				{{1.0f, 0.0f, 1.0f},		{1.0f, 1.0f, 1.0f},		{0.0f, 1.0f, 1.0f} },
-				{{1.0f, 0.0f, 1.0f},		{0.0f, 1.0f, 1.0f},		{0.0f, 0.0f, 1.0f} },
+				// NORTH                                                     
+				{{ 1.0f, 0.0f, 1.0f},    {1.0f, 1.0f, 1.0f},    {0.0f, 1.0f, 1.0f} },
+				{{ 1.0f, 0.0f, 1.0f},    {0.0f, 1.0f, 1.0f},    {0.0f, 0.0f, 1.0f} },
 
-				{{0.0f, 0.0f, 1.0f},		{0.0f, 1.0f, 1.0f},		{0.0f, 1.0f, 0.0f} },
-				{{0.0f, 0.0f, 1.0f},		{0.0f, 1.0f, 0.0f},		{0.0f, 0.0f, 0.0f} },
+				// WEST                                                      
+				{{ 0.0f, 0.0f, 1.0f},    {0.0f, 1.0f, 1.0f},    {0.0f, 1.0f, 0.0f} },
+				{{ 0.0f, 0.0f, 1.0f},    {0.0f, 1.0f, 0.0f},    {0.0f, 0.0f, 0.0f} },
 
-				{{0.0f, 1.0f, 0.0f},		{0.0f, 1.0f, 1.0f},		{1.0f, 1.0f, 1.0f} },
-				{{0.0f, 1.0f, 0.0f},		{1.0f, 1.0f, 1.0f},		{1.0f, 1.0f, 0.0f} },
-
-				{{1.0f, 0.0f, 1.0f},		{0.0f, 0.0f, 1.0f},		{0.0f, 0.0f, 0.0f} },
-				{{1.0f, 0.0f, 1.0f},		{0.0f, 0.0f, 0.0f},		{1.0f, 0.0f, 0.0f} }
+				// TOP                                                       
+				{{ 0.0f, 1.0f, 0.0f},    {0.0f, 1.0f, 1.0f},    {1.0f, 1.0f, 1.0f} },
+				{{ 0.0f, 1.0f, 0.0f},    {1.0f, 1.0f, 1.0f},    {1.0f, 1.0f, 0.0f} },
+				
+				// BOTTOM                                                    
+				{{ 1.0f, 0.0f, 1.0f},    {0.0f, 0.0f, 1.0f},    {0.0f, 0.0f, 0.0f} },
+				{{ 1.0f, 0.0f, 1.0f},    {0.0f, 0.0f, 0.0f},    {1.0f, 0.0f, 0.0f} },
 			};
+
+		/*	cube_.tris = {
+				{{0,0,0},{0,1,0},{1,0,0}},
+				{{0,0,0},{0,1,0},{0,0,1}},
+				{{0,0,0},{0,0,1},{1,0,0}},
+				{{1,0,0},{0,0,1},{0,1,0}}
+			};*/
 		}
 
 		void Engine::setProjectionMatrixParameters(float _near, float _far, float _fov, float _aspectRatio) {
@@ -48,17 +61,19 @@ namespace te {
 			projMat_.data_[3][2] = (-far_*near_)/(far_-near_);
 			projMat_.data_[2][3] = 1.0f;
 			projMat_.data_[3][3] = 0.0f;
-
 		}
 
-		void Engine::draw(uint8_t* _buffer) {
-			memset(_buffer, 0, width_ * height_ * 4);
+		void Engine::draw(SwapBuffer &_buffer) {
+			uint8_t* buffer = _buffer.backBuffer();
+
+			memset(buffer, 0, width_ * height_ * 4);
 
 			Mat44 rotZ = Mat44::rotZ(timeCounter);
 			Mat44 rotX = Mat44::rotX(timeCounter*0.5f);;
 			
+			#pragma omp parallel for
 			for (auto tri : cube_.tris) {
-				timeCounter += 0.000001;
+				timeCounter += 0.00001;
 
 				tri.transform(rotZ).transform(rotX);
 				tri.p_[0].z += 3.0f;
@@ -67,19 +82,17 @@ namespace te {
 
 				// Check if triangle should be drawn
 				Vec3 camera = { 0.0f, 0.0f, 0.0f };
-				
-				Vec3 l1 = tri.p_[1] - tri.p_[0];
-				Vec3 l2 = tri.p_[2] - tri.p_[0];
-				Vec3 n = {
-					l1.y * l2.z - l1.z * l2.y,
-					l1.z * l2.x - l1.x * l2.z,
-					l1.x * l2.y - l1.y * l2.x
-				};
 
-				//if (n.dot(tri.p_[0] - camera) < 0) {
+				Vec3 mid = (tri.p_[0] + tri.p_[1] + tri.p_[2]) / 3;
+
+				if (tri.n_.dot(tri.p_[0] - camera) < 0) {
 					Triangle triProj = projectTriangle(tri);
-					drawTriangle(_buffer, triProj, 255, 255, 255);
-				//}
+					drawTriangleFilled(buffer, triProj, 255, 255, 255);
+
+					Vec3 n1 = projectPoint(mid);
+					Vec3 n2 = projectPoint(mid +tri.n_);
+					drawLine(buffer, n1, n2, 0, 0, 255, 255);
+				}
 
 				/*if (camera.dot(tri.n_) < 0) {
 				} else {
@@ -87,6 +100,8 @@ namespace te {
 					drawTriangle(_buffer, triProj, 0, 0, 255);
 				}*/
 			}
+
+			_buffer.swap();
 		}
 
 		Vec3 Engine::projectPoint(const Vec3& _t) const {
@@ -127,99 +142,21 @@ namespace te {
 		}
 
 		void Engine::drawLine(uint8_t* _buffer, Vec3 _p1, Vec3 _p2, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a){
-			//float dx = _p2.x - _p1.x;
-			//float dy = _p2.y - _p1.y;
+			int x0 = _p1.x;
+			int y0 = _p1.y;
+			int x1 = _p2.x;
+			int y1 = _p2.y;
 
-			//if (dx > dy) { // Line is "more" horizontal
-			//	float m = dy / dx;
-			//	float sign = dx > 0 ? 1 : -1;
-			//	for (unsigned i = 0; i < fabs(dx); i++) {
-			//		unsigned x = _p1.x + sign * i;
-			//		unsigned y = _p1.y + m * sign * i;
-			//		drawPixel(_buffer, y, x, _r, _g, _b, _a);
-			//	}
-			//} else { // "Line is "more" vertical
-			//	float m = dx / dy;
-			//	float sign = dy > 0 ? 1 : -1;
-			//	for (unsigned i = 0; i < fabs(dy); i++) {
-			//		unsigned y = _p1.y + sign * i;
-			//		unsigned x = _p1.x + m * sign * i;
-			//		drawPixel(_buffer, y, x, _r, _g, _b, _a);
-			//	}
-			//}
+			int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+			int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+			int err = dx + dy, e2; /* error value e_xy */
 
-			/*float dx = _p2.x - _p1.x;
-			float dy = _p2.y - _p1.y;
-
-			float m = dy / dx;
-			float b = _p1.y - (m * _p1.x);
-
-			int j = 0;
-			for (size_t i = 0; i < dx; i++) {
-				drawPixel(_buffer, _p1.x + i, round(m * (_p1.x + i) + b), _r, _g, _b, _a);
-			}*/
-
-			int x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
-			dx = _p2.x - _p1.x;
-			dy = _p2.y - _p1.y;
-			dx1 = fabs(dx);
-			dy1 = fabs(dy);
-			px = 2 * dy1 - dx1;
-			py = 2 * dx1 - dy1;
-			if (dy1 <= dx1){
-				if (dx >= 0) {
-					x = _p1.x;
-					y = _p1.y;
-					xe = _p2.x;
-				}
-				else {
-					x = _p2.x;
-					y = _p2.y;
-					xe = _p1.x;
-				}
-				drawPixel(_buffer, x, y, _r, _g, _b, _a);
-				for (i = 0; x < xe; i++) {
-					x = x + 1;
-					if (px < 0) {
-						px = px + 2 * dy1;
-					}
-					else {
-						if ((dx < 0 && dy < 0) || (dx > 0 && dy > 0)) {
-							y = y + 1;
-						}else {
-							y = y - 1;
-						}
-						px = px + 2 * (dy1 - dx1);
-					}
-					drawPixel(_buffer, x, y, _r, _g, _b, _a);
-				}
-			}
-			else {
-				if (dy >= 0){
-					x = _p1.x;
-					y = _p1.y;
-					ye = _p2.y;
-				} else {
-					x = _p2.x;
-					y = _p2.y;
-					ye = _p1.y;
-
-					drawPixel(_buffer, x, y, _r, _g, _b, _a);
-					for (i = 0; y < ye; i++) {
-						y = y + 1;
-						if (py <= 0) {
-							py = py + 2 * dx1;
-						} else {
-							if ((dx < 0 && dy < 0) || (dx > 0 && dy > 0)) {
-								x = x + 1;
-							} else {
-								x = x - 1;
-							}
-							py = py + 2 * (dx1 - dy1);
-						}
-						drawPixel(_buffer, x, y, _r, _g, _b, _a);
-					}
-				}
+			for (;;) {  /* loop */
+				drawPixel(_buffer, x0, y0, _r, _g, _b, _a);
+				if (x0 == x1 && y0 == y1) break;
+				e2 = 2 * err;
+				if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
+				if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
 			}
 		}
 
@@ -230,9 +167,101 @@ namespace te {
 		}
 
 		void Engine::drawTriangleFilled(uint8_t* _buffer, Triangle _t, uint8_t _r, uint8_t _b, uint8_t _g, uint8_t _a) {
-			drawLine(_buffer, _t.p_[0], _t.p_[1], _r, _g, _b, _a);
-			drawLine(_buffer, _t.p_[1], _t.p_[2], _r, _g, _b, _a);
-			drawLine(_buffer, _t.p_[2], _t.p_[0], _r, _g, _b, _a);
+
+			int minY = height_;
+			int maxY = 0;
+			for (unsigned i = 0; i < 3; i++) {
+				minY = minY < _t.p_[i].y? minY : _t.p_[i].y;
+				maxY = maxY > _t.p_[i].y? maxY : _t.p_[i].y;
+			}
+
+			int* contour = new int[2 * (maxY - minY)];
+			for (unsigned i = 0; i < maxY - minY; i++) {
+				contour[i * 2] = width_;
+				contour[i * 2 + 1] = 0;
+			}
+			
+			{
+				int x0 = _t.p_[0].x;
+				int y0 = _t.p_[0].y;
+				int x1 = _t.p_[1].x;
+				int y1 = _t.p_[1].y;
+
+				int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+				int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+				int err = dx + dy, e2; /* error value e_xy */
+
+				for (;;) {  /* loop */
+					if (x0 < contour[(y0 - minY)*2 + 0]) {
+						contour[(y0 - minY)*2 + 0] = x0;
+					}
+					else if (x0 > contour[(y0 - minY)*2 + 1]) {
+						contour[(y0 - minY)*2 + 1] = x0;
+					}
+
+					if (x0 == x1 && y0 == y1) break;
+					e2 = 2 * err;
+					if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
+					if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
+				}
+			}
+
+			{
+				int x0 = _t.p_[1].x;
+				int y0 = _t.p_[1].y;
+				int x1 = _t.p_[2].x;
+				int y1 = _t.p_[2].y;
+
+				int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+				int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+				int err = dx + dy, e2; /* error value e_xy */
+
+				for (;;) {  /* loop */
+					if (x0 < contour[(y0 - minY)*2 + 0]) {
+						contour[(y0 - minY)*2 + 0] = x0;
+					}
+					else if (x0 > contour[(y0 - minY)*2 + 1]) {
+						contour[(y0 - minY)*2 + 1] = x0;
+					}
+
+					if (x0 == x1 && y0 == y1) break;
+					e2 = 2 * err;
+					if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
+					if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
+				}
+			}
+
+			{
+				int x0 = _t.p_[2].x;
+				int y0 = _t.p_[2].y;
+				int x1 = _t.p_[0].x;
+				int y1 = _t.p_[0].y;
+
+				int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+				int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+				int err = dx + dy, e2; /* error value e_xy */
+
+				for (;;) {  /* loop */
+					if (x0 < contour[(y0 - minY) + 0]) {
+						contour[(y0 - minY)*2 + 0] = x0;
+					}
+					else if (x0 > contour[(y0 - minY) + 1]) {
+						contour[(y0 - minY)*2 + 1] = x0;
+					}
+
+					if (x0 == x1 && y0 == y1) break;
+					e2 = 2 * err;
+					if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
+					if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
+				}
+			}
+
+			for (unsigned i = 0; i < maxY - minY; i++) {
+				for (unsigned x = contour[i*2]; x < contour[i*2+1]; x++) {
+					drawPixel(_buffer, x, minY+i, _r, _g, _b, _a);
+				}
+				
+			}
 		}
 	}
 }

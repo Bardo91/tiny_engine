@@ -5,10 +5,12 @@
 //
 //
 
+#ifndef TINYENGINE_CORE_MESH_H_
+#define TINYENGINE_CORE_MESH_H_
+
 #include <core/vector.h>
 #include <vector>
 #include <cassert>
-#pragma once
 
 namespace te {
 	namespace core {
@@ -31,6 +33,7 @@ namespace te {
 				p_[0] = p_[0] * _mat;
 				p_[1] = p_[1] * _mat;
 				p_[2] = p_[2] * _mat;
+				n_ = n_ * _mat;
 				return *this;
 			}
 
@@ -51,3 +54,5 @@ namespace te {
 		};
 	}
 }
+
+#endif

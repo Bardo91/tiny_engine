@@ -48,8 +48,7 @@ namespace te {
         {
             bufferWidth_ = _bufferWidth;
             bufferHeight_ = _bufferHeight;
-            unsigned sizeArray = bufferWidth_ * bufferHeight_ * 4;
-            buffer_ = new uint8_t[sizeArray];
+            buffer_.initialize(bufferWidth_, bufferHeight_);
             t0 = std::chrono::high_resolution_clock::now();
             HRESULT hr;
 
@@ -317,7 +316,7 @@ namespace te {
                 ID2D1Bitmap* bmp;
                 hr = m_pRenderTarget->CreateBitmap(
                     D2D1::SizeU(bufferWidth_, bufferHeight_),
-                    buffer_, // <<--- Wrong, see (a) below
+                    buffer_.frontBuffer(), // <<--- Wrong, see (a) below
                     bufferWidth_ * 4, // <<--- Close but wrong, see (b) below
                     bmpProps, // <<--- Wrong, see (c) below
                     &bmp);

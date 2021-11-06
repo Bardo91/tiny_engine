@@ -27,6 +27,8 @@
 #include <chrono>
 #include <string>
 
+#include <core/Engine.h>
+
 #ifndef HINST_THISCOMPONENT
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
@@ -41,7 +43,7 @@ namespace te {
             // Register the window class and call methods for instantiating drawing resources
             HRESULT Initialize(int _bufferWidth, int _bufferHeigh);
 
-            uint8_t * getBuffer() const { return buffer_; };
+            te::core::SwapBuffer& getBuffer() { return buffer_; };
 
             // Process and dispatch messages
             void RunMessageLoop();
@@ -85,7 +87,7 @@ namespace te {
             ID2D1SolidColorBrush* m_pBlackBrush;
 
             int bufferWidth_, bufferHeight_;
-            uint8_t *buffer_;
+            te::core::SwapBuffer buffer_;
         };
     }
 }

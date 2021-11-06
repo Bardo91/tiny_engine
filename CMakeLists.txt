@@ -26,6 +26,7 @@ target_include_directories(te_os
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
+target_link_libraries(te_os PUBLIC te_core)
 
 find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
