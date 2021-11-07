@@ -6,13 +6,15 @@
 
 #include <core/Engine.h>
 #include <core/stl.h>
-#include<math.h>
+#include <math.h>
+#include <algorithm>
 
 namespace te {
 	namespace core {
 		Engine::Engine(unsigned _width, unsigned _height) {
 			width_ = _width;
 			height_ = _height;
+			zBuffer_ = new float[width_ * height_];
 
 			//mesh_.tris = {
 			//	// SOUTH
@@ -48,7 +50,7 @@ namespace te {
 			//};
 
 			mesh_ = loadStl("C:/Users/Bardo91/Desktop/programming/tiny_engine/samples/eevee.stl");
-			mesh_.scale(0.1);
+			mesh_.scale(0.03);
 		}
 
 		void Engine::setProjectionMatrixParameters(float _near, float _far, float _fov, float _aspectRatio) {
@@ -71,6 +73,7 @@ namespace te {
 			uint8_t* buffer = _buffer.backBuffer();
 
 			memset(buffer, 0, width_ * height_ * 4);
+			std::fill(zBuffer_, zBuffer_ + width_ * height_, std::numeric_limits<float>::max());
 
 			Mat44 rotZ = Mat44::rotZ(timeCounter);
 			Mat44 rotX = Mat44::rotX(timeCounter*0.5f);
@@ -107,17 +110,7 @@ namespace te {
 					}
 
 					drawTriangleFilled(buffer, triProj, light, light, light);
-
-					//Vec3 n1 = projectPoint(mid);
-					//Vec3 n2 = projectPoint(mid +tri.n_);
-					//drawLine(buffer, n1, n2, 0, 0, 255, 255);
 				}
-
-				/*if (camera.dot(tri.n_) < 0) {
-				} else {
-					Triangle triProj = projectTriangle(tri);
-					drawTriangle(_buffer, triProj, 0, 0, 255);
-				}*/
 			}
 
 			_buffer.swap();
@@ -251,12 +244,17 @@ namespace te {
 			ScanLine(contour, _t.p_[1].x, _t.p_[1].y, _t.p_[2].x, _t.p_[2].y);
 			ScanLine(contour, _t.p_[2].x, _t.p_[2].y, _t.p_[0].x, _t.p_[0].y);
 
+			float midVal = (_t.p_[0].z + _t.p_[1].z + _t.p_[2].z) / 3;
+
 			for (unsigned i = 0; i < height_; i++) {
-				for (unsigned x = contour[i*2]; x < contour[i*2+1]; x++) {
-					if (contour[i*2+1] >= contour[i*2]) {
-						drawPixel(_buffer, x, i, _r, _g, _b, _a);
+				for (unsigned x = contour[i * 2]; x <= contour[i * 2 + 1]; x++) {
+					if (contour[i * 2 + 1] >= contour[i * 2]) {
+						if (zBuffer_[i * width_ + x] > midVal) {
+							zBuffer_[i * width_ + x] = midVal;
+							drawPixel(_buffer, x, i, _r, _g, _b, _a);
+						}
 					}
-				}	
+				}
 			}
 		}
 	}

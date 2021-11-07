@@ -99,6 +99,8 @@ namespace te {
 
 			Mesh mesh_;
 			float timeCounter = 0.0f;
+
+			float* zBuffer_;
 		
 		};
 	}

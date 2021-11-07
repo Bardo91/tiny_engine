@@ -10,6 +10,7 @@
 #include <os/WindowWindows.h>
 #include <thread>
 #include <chrono>
+#include <iostream>
 
 namespace te {
 	namespace os {
@@ -237,47 +238,56 @@ namespace te {
 
                 bool wasHandled = false;
 
-                if (pWindowWindows)
-                {
-                    switch (message)
-                    {
-                    case WM_SIZE:
-                    {
-                        UINT width = LOWORD(lParam);
-                        UINT height = HIWORD(lParam);
-                        pWindowWindows->OnResize(width, height);
-                    }
-                    result = 0;
-                    wasHandled = true;
-                    break;
-
-                    case WM_DISPLAYCHANGE:
-                    {
-                        InvalidateRect(hwnd, NULL, FALSE);
-                    }
-                    result = 0;
-                    wasHandled = true;
-                    break;
-                    case WM_PAINT:
-                    {
-                        break;
-                    }
-                    case WM_TIMER:
-                    {
-                        pWindowWindows->OnRender();
-                        ValidateRect(hwnd, NULL);
-                    }
-                    result = 0;
-                    wasHandled = true;
-                    break;
-
-                    case WM_DESTROY:
-                    {
-                        PostQuitMessage(0);
-                    }
-                    result = 1;
-                    wasHandled = true;
-                    break;
+                if (pWindowWindows) {
+                    switch (message) {
+                        case WM_SIZE: {
+                            UINT width = LOWORD(lParam);
+                            UINT height = HIWORD(lParam);
+                            pWindowWindows->OnResize(width, height);
+                            result = 0;
+                            wasHandled = true;
+                            break;
+                        }
+                        case WM_DISPLAYCHANGE: {
+                            InvalidateRect(hwnd, NULL, FALSE);
+                            result = 0;
+                            wasHandled = true;
+                            break;
+                        }
+                        case WM_PAINT: {
+                            break;
+                        }
+                        case WM_TIMER: {
+                            pWindowWindows->OnRender();
+                            ValidateRect(hwnd, NULL);
+                            result = 0;
+                            wasHandled = true;
+                            break;
+                        } 
+                        case WM_DESTROY: {
+                            PostQuitMessage(0);
+                            result = 1;
+                            wasHandled = true;
+                            break;
+                        }
+                        case WM_SYSKEYDOWN:
+                            std::cout << "WM_SYSKEYDOWN: " << wParam << std::endl;
+                            break;
+                        case WM_SYSCHAR:
+                            std::cout << "WM_SYSCHAR: " << wParam << std::endl;
+                            break;
+                        case WM_SYSKEYUP:
+                            std::cout << "WM_SYSKEYUP: " << wParam << std::endl;
+                            break;
+                        case WM_KEYDOWN:
+                            std::cout << "WM_KEYDOWN: " << wParam << std::endl;
+                            break;
+                        case WM_KEYUP:
+                            std::cout << "WM_KEYUP: " << wParam << std::endl;
+                            break;
+                        case WM_CHAR:
+                            std::cout << "WM_CHAR: " << wParam << std::endl;
+                            break;
                     }
                 }
 
