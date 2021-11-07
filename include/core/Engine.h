@@ -97,7 +97,7 @@ namespace te {
 
 			Mat44 projMat_;
 
-			Mesh cube_;
+			Mesh mesh_;
 			float timeCounter = 0.0f;
 		
 		};

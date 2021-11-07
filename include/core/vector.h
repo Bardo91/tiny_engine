@@ -39,6 +39,14 @@ namespace te {
 				return res;
 			}
 
+			Vec3 operator*(const float& _scalar) const {
+				Vec3 res;
+				res.x = x * _scalar;
+				res.y = y * _scalar;
+				res.z = z * _scalar;
+				return res;
+			}
+
 			float norm() const {
 				return sqrt(x * x + y * y + z * z);
 			}

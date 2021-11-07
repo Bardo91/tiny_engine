@@ -5,6 +5,7 @@
 //
 
 #include <core/Engine.h>
+#include <core/stl.h>
 #include<math.h>
 
 namespace te {
@@ -13,38 +14,41 @@ namespace te {
 			width_ = _width;
 			height_ = _height;
 
-			cube_.tris = {
-				// SOUTH
-				{{ 0.0f, 0.0f, 0.0f},    {0.0f, 1.0f, 0.0f},    {1.0f, 1.0f, 0.0f} },
-				{{ 0.0f, 0.0f, 0.0f},    {1.0f, 1.0f, 0.0f},    {1.0f, 0.0f, 0.0f} },
+			//mesh_.tris = {
+			//	// SOUTH
+			//	{{ 0.0f, 0.0f, 0.0f},    {0.0f, 1.0f, 0.0f},    {1.0f, 1.0f, 0.0f} },
+			//	{{ 0.0f, 0.0f, 0.0f},    {1.0f, 1.0f, 0.0f},    {1.0f, 0.0f, 0.0f} },
 
-				// EAST                                                      
-				{{ 1.0f, 0.0f, 0.0f},    {1.0f, 1.0f, 0.0f},    {1.0f, 1.0f, 1.0f} },
-				{{ 1.0f, 0.0f, 0.0f},    {1.0f, 1.0f, 1.0f},    {1.0f, 0.0f, 1.0f} },
+			//	// EAST                                                      
+			//	{{ 1.0f, 0.0f, 0.0f},    {1.0f, 1.0f, 0.0f},    {1.0f, 1.0f, 1.0f} },
+			//	{{ 1.0f, 0.0f, 0.0f},    {1.0f, 1.0f, 1.0f},    {1.0f, 0.0f, 1.0f} },
 
-				// NORTH                                                     
-				{{ 1.0f, 0.0f, 1.0f},    {1.0f, 1.0f, 1.0f},    {0.0f, 1.0f, 1.0f} },
-				{{ 1.0f, 0.0f, 1.0f},    {0.0f, 1.0f, 1.0f},    {0.0f, 0.0f, 1.0f} },
+			//	// NORTH                                                     
+			//	{{ 1.0f, 0.0f, 1.0f},    {1.0f, 1.0f, 1.0f},    {0.0f, 1.0f, 1.0f} },
+			//	{{ 1.0f, 0.0f, 1.0f},    {0.0f, 1.0f, 1.0f},    {0.0f, 0.0f, 1.0f} },
 
-				// WEST                                                      
-				{{ 0.0f, 0.0f, 1.0f},    {0.0f, 1.0f, 1.0f},    {0.0f, 1.0f, 0.0f} },
-				{{ 0.0f, 0.0f, 1.0f},    {0.0f, 1.0f, 0.0f},    {0.0f, 0.0f, 0.0f} },
+			//	// WEST                                                      
+			//	{{ 0.0f, 0.0f, 1.0f},    {0.0f, 1.0f, 1.0f},    {0.0f, 1.0f, 0.0f} },
+			//	{{ 0.0f, 0.0f, 1.0f},    {0.0f, 1.0f, 0.0f},    {0.0f, 0.0f, 0.0f} },
 
-				// TOP                                                       
-				{{ 0.0f, 1.0f, 0.0f},    {0.0f, 1.0f, 1.0f},    {1.0f, 1.0f, 1.0f} },
-				{{ 0.0f, 1.0f, 0.0f},    {1.0f, 1.0f, 1.0f},    {1.0f, 1.0f, 0.0f} },
-				
-				// BOTTOM                                                    
-				{{ 1.0f, 0.0f, 1.0f},    {0.0f, 0.0f, 1.0f},    {0.0f, 0.0f, 0.0f} },
-				{{ 1.0f, 0.0f, 1.0f},    {0.0f, 0.0f, 0.0f},    {1.0f, 0.0f, 0.0f} },
-			};
+			//	// TOP                                                       
+			//	{{ 0.0f, 1.0f, 0.0f},    {0.0f, 1.0f, 1.0f},    {1.0f, 1.0f, 1.0f} },
+			//	{{ 0.0f, 1.0f, 0.0f},    {1.0f, 1.0f, 1.0f},    {1.0f, 1.0f, 0.0f} },
+			//	
+			//	// BOTTOM                                                    
+			//	{{ 1.0f, 0.0f, 1.0f},    {0.0f, 0.0f, 1.0f},    {0.0f, 0.0f, 0.0f} },
+			//	{{ 1.0f, 0.0f, 1.0f},    {0.0f, 0.0f, 0.0f},    {1.0f, 0.0f, 0.0f} },
+			//};
 
-			//cube_.tris = {
+			//mesh_.tris = {
 			//	//{{0,0,0},{0,1,0},{1,0,0}},
 			//	//{{0,0,0},{0,1,0},{0,0,1}},
 			//	//{{0,0,0},{0,0,1},{1,0,0}},
 			//	{{1,0,0},{0,0,1},{0,1,0}}
 			//};
+
+			mesh_ = loadStl("C:/Users/Bardo91/Desktop/programming/tiny_engine/samples/eevee.stl");
+			mesh_.scale(0.1);
 		}
 
 		void Engine::setProjectionMatrixParameters(float _near, float _far, float _fov, float _aspectRatio) {
@@ -69,10 +73,10 @@ namespace te {
 			memset(buffer, 0, width_ * height_ * 4);
 
 			Mat44 rotZ = Mat44::rotZ(timeCounter);
-			Mat44 rotX = Mat44::rotX(timeCounter*0.5f);;
+			Mat44 rotX = Mat44::rotX(timeCounter*0.5f);
 			
 			#pragma omp parallel for
-			for (auto tri : cube_.tris) {
+			for (auto tri : mesh_.tris) {
 				timeCounter += 0.00001;
 
 				tri.transform(rotZ).transform(rotX);

@@ -37,11 +37,19 @@ namespace te {
 				return *this;
 			}
 
-			Triangle operator*(const Mat44 & _mat) const {
+			Triangle operator*(const Mat44& _mat) const {
 				return {
 					p_[0] * _mat,
 					p_[1] * _mat,
 					p_[2] * _mat
+				};
+			}
+
+			Triangle operator*(const float& _factor) const {
+				return {
+					p_[0] * _factor,
+					p_[1] * _factor,
+					p_[2] * _factor
 				};
 			}
 
@@ -51,6 +59,12 @@ namespace te {
 
 		struct Mesh {
 			std::vector<Triangle> tris;
+
+			void scale(float _factor) {
+				for (auto& t: tris) {
+					t = t * _factor;
+				}
+			}
 		};
 	}
 }
