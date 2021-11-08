@@ -49,7 +49,7 @@ namespace te {
 			//	{{1,0,0},{0,0,1},{0,1,0}}
 			//};
 
-			mesh_ = loadStl("C:/Users/Bardo91/Desktop/programming/tiny_engine/samples/eevee.stl");
+			mesh_ = loadStl("C:/Users/Alejandro/Desktop/tiny_engine/samples/eevee.stl");
 			mesh_.scale(0.03);
 		}
 
@@ -256,6 +256,8 @@ namespace te {
 					}
 				}
 			}
+
+			delete[] contour;
 		}
 	}
 }
