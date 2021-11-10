@@ -278,9 +278,11 @@ namespace te {
                             break;
                         case WM_KEYDOWN:
                             std::cout << "WM_KEYDOWN: " << wParam << std::endl;
+                            keyboardController_.flush({ te::core::KeyEvent::Type::KeyDown, wParam });
                             break;
                         case WM_KEYUP:
                             std::cout << "WM_KEYUP: " << wParam << std::endl;
+                            keyboardController_.flush({ te::core::KeyEvent::Type::KeyUp, wParam });
                             break;
                         case WM_CHAR:
                             std::cout << "WM_CHAR: " << wParam << std::endl;

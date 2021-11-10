@@ -34,9 +34,11 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
 #endif
 
+#include <core/Controller.h>
 
 namespace te {
     namespace os {
+
         class WindowWindows {
         public:
             WindowWindows(const te::core::SwapBuffer& _buffer);
@@ -47,6 +49,8 @@ namespace te {
 
             // Process and dispatch messages
             void RunMessageLoop();
+
+            Controller& controller() const { return keyboardController_; };
 
         private:
             // Initialize device-independent resources.
@@ -86,7 +90,7 @@ namespace te {
             IDWriteTextFormat* m_pTextFormat;
             ID2D1SolidColorBrush* m_pBlackBrush;
 
-
+            te::core::Controller keyboardController_;
             const te::core::SwapBuffer& buffer_;
         };
     }
