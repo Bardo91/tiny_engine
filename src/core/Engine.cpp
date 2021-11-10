@@ -5,7 +5,6 @@
 //
 
 #include <core/Engine.h>
-#include <core/stl.h>
 #include <math.h>
 #include <algorithm>
 
@@ -53,8 +52,6 @@ namespace te {
 			cam_.setProjectionMatrixParameters(0.1f, 1000.0f, 90.0f, float(height_)/ width_);
 			cam_.renderShape(width_, height_);
 
-			mesh_ = loadStl("C:/Users/Alejandro/Desktop/tiny_engine/samples/eevee.stl");
-			mesh_.scale(0.03);
 		}
 
 		void Engine::render() {
@@ -66,38 +63,40 @@ namespace te {
 			Mat44 rotZ = Mat44::rotZ(timeCounter);
 			Mat44 rotX = Mat44::rotX(timeCounter*0.5f);
 			
-			#pragma omp parallel for
-			for (auto tri : mesh_.tris) {
-				timeCounter += 0.00001;
+			for(auto &entity:scene_->entities()){
+				#pragma omp parallel for
+				for (auto tri : entity.mesh_.tris) {
+					timeCounter += 0.00001;
 
-				tri.transform(rotZ).transform(rotX);
-				tri.p_[0].z += 3.0f;
-				tri.p_[1].z += 3.0f;
-				tri.p_[2].z += 3.0f;
+					tri.transform(rotZ).transform(rotX);
+					tri.p_[0].z += 3.0f;
+					tri.p_[1].z += 3.0f;
+					tri.p_[2].z += 3.0f;
 
-				// Check if triangle should be drawn
-				Vec3 camera = { 0.0f, 0.0f, 0.0f };
+					// Check if triangle should be drawn
+					Vec3 camera = { 0.0f, 0.0f, 0.0f };
 
-				Vec3 mid = (tri.p_[0] + tri.p_[1] + tri.p_[2]) / 3;
-				Vec3 lightDir = { 1,1,0 };
-				lightDir = lightDir/lightDir.norm();
+					Vec3 mid = (tri.p_[0] + tri.p_[1] + tri.p_[2]) / 3;
+					Vec3 lightDir = { 1,1,0 };
+					lightDir = lightDir/lightDir.norm();
 
-				if (tri.n_.dot(tri.p_[0] - camera) < 0) {
-					Triangle triProj = projectTriangle(tri);
+					if (tri.n_.dot(tri.p_[0] - camera) < 0) {
+						Triangle triProj = projectTriangle(tri);
 
-					int light = 0;
-					float valLight = tri.n_.dot(lightDir);
-					if (valLight > -1 && valLight < -0.5) {
-						light = 255;
-					}else if (valLight > -0.5 && valLight < 0) {
-						light = 175;
-					}else if (valLight > 0 && valLight < 0.5) {
-						light = 100;
-					} else {
-						light = 50;
+						int light = 0;
+						float valLight = tri.n_.dot(lightDir);
+						if (valLight > -1 && valLight < -0.5) {
+							light = 255;
+						}else if (valLight > -0.5 && valLight < 0) {
+							light = 175;
+						}else if (valLight > 0 && valLight < 0.5) {
+							light = 100;
+						} else {
+							light = 50;
+						}
+
+						drawTriangleFilled(buffer, triProj, light, light, light);
 					}
-
-					drawTriangleFilled(buffer, triProj, light, light, light);
 				}
 			}
 

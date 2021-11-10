@@ -1,12 +1,15 @@
+//
+//
+//
+//
 
-
+#include <thread>
 #include <os/WindowWindows.h>
 #include <core/Engine.h>
+#include <core/Entity.h>
 
 using namespace te::os;
 using namespace te::core;
-
-#include <thread>
 
 int main(int _argc, char** _argv) {
 
@@ -15,6 +18,13 @@ int main(int _argc, char** _argv) {
 
     Engine engine(width, height);
     WindowWindows win(engine.buffer());
+
+    std::shared_ptr<Scene> scene(new Scene);
+    engine.setScene(scene);
+    scene->setLight({0,0,0}, {0,0,1});
+    Entity eevee;
+    eevee.loadMeshFromFile("C:/Users/Alejandro/Desktop/tiny_engine/samples/eevee.stl");
+    scene->addEntity(eevee);
 
     if (SUCCEEDED(win.Initialize())) {
         std::thread t([&] {

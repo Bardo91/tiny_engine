@@ -8,11 +8,15 @@
 #define TINYENGINE_CORE_ENGINE_H_
 
 #include <cstdint>
+#include <mutex>
+#include <memory>
+
+#include <core/Camera.h>
 #include <core/mesh.h>
 #include <core/matrix.h>
-#include <mutex>
 #include <core/SwapBuffer.h>
-#include <core/Camera.h>
+#include <core/Scene.h>
+
 
 namespace te {
 	namespace core {
@@ -25,6 +29,8 @@ namespace te {
 			void render();
 
 			const SwapBuffer &buffer(){return buffer_;};
+
+			void setScene(std::shared_ptr<Scene> _scene){ scene_ = _scene;};
 
 		private:
 			Triangle projectTriangle(const Triangle& _t) const;
@@ -40,13 +46,14 @@ namespace te {
 		private:
 			unsigned width_, height_;
 
-			Mesh mesh_;
 			float timeCounter = 0.0f;
 
 			float* zBuffer_;
 			SwapBuffer buffer_;
 
 			Camera cam_;		
+
+			std::shared_ptr<Scene> scene_;
 		};
 	}
 }
