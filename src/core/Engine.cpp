@@ -76,15 +76,11 @@ namespace te {
 					// Check if triangle should be drawn
 					Vec3 camera = { 0.0f, 0.0f, 0.0f };
 
-					Vec3 mid = (tri.p_[0] + tri.p_[1] + tri.p_[2]) / 3;
-					Vec3 lightDir = { 1,1,0 };
-					lightDir = lightDir/lightDir.norm();
-
 					if (tri.n_.dot(tri.p_[0] - camera) < 0) {
 						Triangle triProj = projectTriangle(tri);
 
 						int light = 0;
-						float valLight = tri.n_.dot(lightDir);
+						float valLight = tri.n_.dot(scene_->light().direction);
 						if (valLight > -1 && valLight < -0.5) {
 							light = 255;
 						}else if (valLight > -0.5 && valLight < 0) {
