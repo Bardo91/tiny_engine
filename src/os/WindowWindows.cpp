@@ -15,12 +15,13 @@
 namespace te {
 	namespace os {
 
-        WindowWindows::WindowWindows() :
+        WindowWindows::WindowWindows(const te::core::SwapBuffer& _buffer) :
             m_hwnd(NULL),
             m_pDirect2dFactory(NULL),
             m_pRenderTarget(NULL),
             m_pLightSlateGrayBrush(NULL),
-            m_pCornflowerBlueBrush(NULL)
+            m_pCornflowerBlueBrush(NULL),
+            buffer_(_buffer)
         {
         }
 
@@ -45,11 +46,7 @@ namespace te {
             }
         }
 
-        HRESULT WindowWindows::Initialize(int _bufferWidth, int _bufferHeight)
-        {
-            bufferWidth_ = _bufferWidth;
-            bufferHeight_ = _bufferHeight;
-            buffer_.initialize(bufferWidth_, bufferHeight_);
+        HRESULT WindowWindows::Initialize() {
             t0 = std::chrono::high_resolution_clock::now();
             HRESULT hr;
 
@@ -326,9 +323,9 @@ namespace te {
                 ID2D1Bitmap* bmp;
                 buffer_.lock();
                 hr = m_pRenderTarget->CreateBitmap(
-                    D2D1::SizeU(bufferWidth_, bufferHeight_),
+                    D2D1::SizeU(buffer_.width(), buffer_.height()),
                     buffer_.frontBuffer(), // <<--- Wrong, see (a) below
-                    bufferWidth_ * 4, // <<--- Close but wrong, see (b) below
+                    buffer_.width() * 4, // <<--- Close but wrong, see (b) below
                     bmpProps, // <<--- Wrong, see (c) below
                     &bmp);
                 buffer_.unlock();
@@ -338,7 +335,7 @@ namespace te {
                         D2D1::RectF(0, 0, width, height), 
                         1.0f,
                         D2D1_BITMAP_INTERPOLATION_MODE::D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
-                        D2D1::RectF(0, 0, bufferWidth_, bufferHeight_));
+                        D2D1::RectF(0, 0, buffer_.width(), buffer_.height()));
                 }
                 bmp->Release();
 

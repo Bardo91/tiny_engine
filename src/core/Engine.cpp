@@ -15,6 +15,7 @@ namespace te {
 			width_ = _width;
 			height_ = _height;
 			zBuffer_ = new float[width_ * height_];
+			buffer_.initialize(width_, height_);
 
 			//mesh_.tris = {
 			//	// SOUTH
@@ -49,28 +50,15 @@ namespace te {
 			//	{{1,0,0},{0,0,1},{0,1,0}}
 			//};
 
+			cam_.setProjectionMatrixParameters(0.1f, 1000.0f, 90.0f, float(height_)/ width_);
+			cam_.renderShape(width_, height_);
+
 			mesh_ = loadStl("C:/Users/Alejandro/Desktop/tiny_engine/samples/eevee.stl");
 			mesh_.scale(0.03);
 		}
 
-		void Engine::setProjectionMatrixParameters(float _near, float _far, float _fov, float _aspectRatio) {
-			near_ = _near;
-			far_ = _far;
-			fov_ = _fov;
-			aspectRatio_ = _aspectRatio;
-			
-			fovRad_ = 1.0f / tanf(fov_ * 0.5f / 180.0f * 3.14159f);
-			
-			projMat_.data_[0][0] = aspectRatio_ * fovRad_;
-			projMat_.data_[1][1] = fovRad_;
-			projMat_.data_[2][2] = far_/(far_-near_);
-			projMat_.data_[3][2] = (-far_*near_)/(far_-near_);
-			projMat_.data_[2][3] = 1.0f;
-			projMat_.data_[3][3] = 0.0f;
-		}
-
-		void Engine::draw(SwapBuffer &_buffer) {
-			uint8_t* buffer = _buffer.backBuffer();
+		void Engine::render() {
+			uint8_t* buffer = buffer_.backBuffer();
 
 			memset(buffer, 0, width_ * height_ * 4);
 			std::fill(zBuffer_, zBuffer_ + width_ * height_, std::numeric_limits<float>::max());
@@ -113,34 +101,14 @@ namespace te {
 				}
 			}
 
-			_buffer.swap();
-		}
-
-		Vec3 Engine::projectPoint(const Vec3& _t) const {
-			Vec3 point = _t * projMat_;
-			point.x += 1.0f; 
-			point.y += 1.0f;
-			point.x *= 0.5f * width_;
-			point.y *= 0.5f * height_;
-			return point;
+			buffer_.swap();
 		}
 
 		Triangle Engine::projectTriangle(const Triangle& _t) const {
-			Triangle triProj = _t;
-
-			triProj.transform(projMat_);
-
-			triProj.p_[0].x += 1.0f; triProj.p_[0].y += 1.0f;
-			triProj.p_[1].x += 1.0f; triProj.p_[1].y += 1.0f;
-			triProj.p_[2].x += 1.0f; triProj.p_[2].y += 1.0f;
-
-			triProj.p_[0].x *= 0.5f * width_;
-			triProj.p_[0].y *= 0.5f * height_;
-			triProj.p_[1].x *= 0.5f * width_;
-			triProj.p_[1].y *= 0.5f * height_;
-			triProj.p_[2].x *= 0.5f * width_;
-			triProj.p_[2].y *= 0.5f * height_;
-
+			Triangle triProj;
+			for(unsigned i=0; i < 3; i++){
+				triProj.p_[i] = cam_.projectPoint(_t.p_ [i]);
+			}
 			return triProj;
 		}
 

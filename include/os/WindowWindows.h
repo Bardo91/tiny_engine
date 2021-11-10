@@ -27,23 +27,23 @@
 #include <chrono>
 #include <string>
 
-#include <core/Engine.h>
+#include <core/SwapBuffer.h>
 
 #ifndef HINST_THISCOMPONENT
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
 #endif
+
+
 namespace te {
     namespace os {
         class WindowWindows {
         public:
-            WindowWindows();
+            WindowWindows(const te::core::SwapBuffer& _buffer);
             ~WindowWindows();
 
             // Register the window class and call methods for instantiating drawing resources
-            HRESULT Initialize(int _bufferWidth, int _bufferHeigh);
-
-            te::core::SwapBuffer& getBuffer() { return buffer_; };
+            HRESULT Initialize();
 
             // Process and dispatch messages
             void RunMessageLoop();
@@ -86,8 +86,8 @@ namespace te {
             IDWriteTextFormat* m_pTextFormat;
             ID2D1SolidColorBrush* m_pBlackBrush;
 
-            int bufferWidth_, bufferHeight_;
-            te::core::SwapBuffer buffer_;
+
+            const te::core::SwapBuffer& buffer_;
         };
     }
 }
