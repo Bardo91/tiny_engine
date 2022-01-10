@@ -23,7 +23,7 @@ int main(int _argc, char** _argv) {
     engine.setScene(scene);
     scene->setLight({0,0,0}, {0,0,1});
     Entity eevee;
-    eevee.loadMeshFromFile("C:/Users/Alejandro/Desktop/tiny_engine/samples/eevee.stl");
+    eevee.loadMeshFromFile(_argv[1]);
     scene->addEntity(eevee);
 
     if (SUCCEEDED(win.Initialize())) {

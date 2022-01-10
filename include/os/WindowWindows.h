@@ -50,7 +50,7 @@ namespace te {
             // Process and dispatch messages
             void RunMessageLoop();
 
-            Controller& controller() const { return keyboardController_; };
+            te::core::Controller& controller() { return keyboardController_; };
 
         private:
             // Initialize device-independent resources.

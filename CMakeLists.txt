@@ -2,6 +2,7 @@
 #  Just having fun
 #
 #
+
 cmake_minimum_required(VERSION 3.12)
 
 set(TINY_ENGINE_VERSION "0.0.0")

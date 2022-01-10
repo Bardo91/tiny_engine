@@ -51,7 +51,7 @@ namespace te {
 			float* zBuffer_;
 			SwapBuffer buffer_;
 
-			Camera cam_;		
+			te::core::Camera cam_;
 
 			std::shared_ptr<Scene> scene_;
 		};

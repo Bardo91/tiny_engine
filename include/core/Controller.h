@@ -4,8 +4,8 @@
 //
 //
 
-#ifndef TINYENGINE_CORE_CAMERA_H_
-#define TINYENGINE_CORE_CAMERA_H_
+#ifndef TINYENGINE_CORE_CONTROLLER_H_
+#define TINYENGINE_CORE_CONTROLLER_H_
 
 #include <cstdint>
 #include <functional>
