@@ -1,6 +1,6 @@
 # TINY ENGINE
 
-Very naive implementation of render engine.
+Very naive implementation of a render engine.
 
 ![sample render](https://github.com/Bardo91/tiny_engine/blob/master/doc/sample_render.gif?raw=true)
 
